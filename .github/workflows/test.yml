@@ -1,4 +1,4 @@
-name: PHP CI
+name: PHP CI Testing
 
 on:
   push:
@@ -16,7 +16,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: 8.2
+          php-version: 8.4
 
       - name: Validate PHP syntax
-        run: find . -type f -name "*.php" -exec php -l {} \
+        run: find . -type f -name "*.php" -exec php -l {} \:
