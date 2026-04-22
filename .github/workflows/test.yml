@@ -1,4 +1,4 @@
-name: PHP CI Testing
+name: PHP CI + Deploy
 
 on:
   push:
@@ -19,4 +19,22 @@ jobs:
           php-version: 8.4
 
       - name: Validate PHP syntax
-        run: find . -type f -name "*.php" -exec php -l {} \:
+        run: find . -type f -name "*.php" -exec php -l {} \;
+
+  deploy:
+    needs: php-tests   # 👈 this is critical
+    runs-on: ubuntu-latest
+
+    # 👇 only deploy on push to main (not PR)
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd ${{ secrets.WORK_DIR }}
+            git pull origin main
