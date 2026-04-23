@@ -25,8 +25,8 @@ jobs:
     needs: php-tests   # 👈 this is critical
     runs-on: ubuntu-latest
 
-    # 👇 only deploy on push to main (not PR)
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    # 👇 only deploy on push to main branch gt (not PR)
+    if: github.ref == 'refs/heads/main'
 
     steps:
       - name: Deploy via SSH
