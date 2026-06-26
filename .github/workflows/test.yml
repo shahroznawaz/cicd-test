@@ -2,39 +2,53 @@ name: PHP CI + Deploy
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
   pull_request:
-    branches: [main]
+    branches:
+      - main
 
 jobs:
   php-tests:
+    name: PHP Syntax Check
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: 8.4
+          php-version: "8.4"
 
-      - name: Validate PHP syntax
-        run: find . -type f -name "*.php" -exec php -l {} \;
+      - name: Validate PHP Files
+        run: |
+          find . -type f -name "*.php" -exec php -l {} \;
 
   deploy:
-    needs: php-tests   # 👈 this is critical
+    name: Deploy to Server
+    needs: php-tests
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
 
-    # 👇 only deploy on push to main branch gt (not PR)
-    if: github.ref == 'refs/heads/main'
-
     steps:
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1.0.0
+      - name: Deploy over SSH
+        uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          password: ${{ secrets.SSH_PASSWORD }}
           script: |
+            set -e
+
+            echo "Deploying..."
             cd ${{ secrets.WORK_DIR }}
+
+            pwd
+            whoami
+            git status
+
             git pull origin main
+
+            echo "Deployment completed successfully."
